@@ -30,17 +30,13 @@ function App() {
         (res) =>
           res.ok && setTodos([...todos.slice(0, index), ...todos.slice(index + 1, todos.length)])
       );
-    // .then((data) => {
-    //   setInputValue('');
-    //   setTodos([...todos, data]);
-    // });
   };
 
   return (
     <div className="App">
       <header className="App-header">TODOAPP</header>
       <Controls addTodo={addTodo} inputValue={inputValue} setInputValue={setInputValue} />
-      <TodoList todos={todos} deleteTodo={deleteTodo} setTodos={setTodos} todos={todos}/>
+      <TodoList todos={todos} deleteTodo={deleteTodo} setTodos={setTodos} todos={todos} />
     </div>
   );
 }

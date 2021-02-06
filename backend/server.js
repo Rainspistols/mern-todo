@@ -34,8 +34,8 @@ const getAllTodos = (req, res) => {
 };
 
 const getTodo = (req, res) => {
-  Todo.findById(req.params._id, (err, todo) => {
-    todo ? res.json(todo) : res.json(`${req.params._id} is not valid`);
+  Todo.findById(req.params.id, (err, todo) => {
+    todo ? res.json(todo) : res.json(`${req.params.id} is not valid`);
   });
 };
 
@@ -45,25 +45,24 @@ const createTodo = (req, res) => {
 };
 
 const deleteTodo = (req, res) => {
-  Todo.deleteOne({ _id: req.params._id }, (err, removedTodo) => {
+  Todo.deleteOne({ _id: req.params.id }, (err, removedTodo) => {
     if (err) return res.send(err);
     return res.json(removedTodo);
   });
 };
 
 const editTodo = (req, res) => {
-  Todo.updateOne({ _id: req.body._id }, { name: req.body.name }, (err, editedTodo) => {
+  Todo.updateOne({ _id: req.params.id }, { name: req.body.name }, (err, editedTodo) => {
     if (err) return res.send(err);
     return res.json(editedTodo);
   });
 };
 
 app.get('/api/todos', getAllTodos);
-app.get('/api/todos/:_id', getTodo);
+app.get('/api/todos/:id', getTodo);
 app.post('/api/todos', createTodo);
-app.delete('/api/todos/:_id', deleteTodo);
-app.put('/api/todos', editTodo);
-// app.delete('/api/todo:id',deleteTodo )
+app.delete('/api/todos/:id', deleteTodo);
+app.put('/api/todos/:id', editTodo);
 
 app.listen(port, function () {
   console.log(`Listening on ${port}`);

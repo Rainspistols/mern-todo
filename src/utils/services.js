@@ -27,15 +27,14 @@ export default class MongoService {
     });
   };
 
-  putResource = (url, id, name) => {
-    console.log(url,id, name);
+  putResource = (url, name) => {
     return fetch(`${this._apiBase}${url}`, {
       method: 'PUT',
       headers: {
         Accept: 'application/json',
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ _id: id, name: name }),
+      body: JSON.stringify({ name: name }),
     });
   };
 
@@ -43,5 +42,5 @@ export default class MongoService {
   getTodo = (id) => this.getResource(`/todos/${id}`);
   postTodo = (body) => this.postResource('/todos', body);
   deleteTodo = (id) => this.deleteResource(`/todos/${id}`);
-  editTodo = (id, name) => this.putResource(`/todos`, id, name);
+  editTodo = (id, name) => this.putResource(`/todos/${id}`, name);
 }
