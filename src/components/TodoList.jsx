@@ -9,17 +9,16 @@ const TodoItem = ({ item, deleteTodo, setTodos, todos }) => {
 
   const onSpanClick = () => setEdit(true);
   const onInputBlur = () => {
-    mongoService
-      .editTodo(item._id, inputValues)
-      .then(
-        (res) =>
-          res.ok &&
-          setTodos(
-            todos.map((todoItem) =>
-              todoItem._id === item._id ? { ...todoItem, ...{ name: inputValues } } : todoItem
-            )
+    console.log(item._id);
+    mongoService.editTodo(item._id, { name: inputValues }).then((data) => {
+      if (data.result === 'updated') {
+        setTodos(
+          todos.map((todoItem) =>
+            todoItem._id === item._id ? { ...todoItem, ...{ name: inputValues } } : todoItem
           )
-      );
+        );
+      }
+    });
     setEdit(false);
   };
 

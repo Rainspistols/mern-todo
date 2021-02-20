@@ -1,15 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const Controls = ({ addTodo, inputValue, setInputValue }) => {
+const Controls = ({ addTodo, inputValue, setInputValue, searchTodo }) => {
+  const [searchInput, setSearchInput] = useState('');
+
   const onSubmit = (e) => {
     e.preventDefault();
     addTodo();
   };
 
+  const onSearchChange = (e) => {
+    setSearchInput(e.target.value);
+    searchTodo(e.target.value);
+  };
+
   return (
     <>
       <form onSubmit={onSubmit} className="form">
-        <input type="search" name="search-todo" id="search-todo" placeholder="search" />
+        <input
+          type="search"
+          name="search-todo"
+          id="search-todo"
+          placeholder="search"
+          value={searchInput}
+          onChange={onSearchChange}
+        />
         <br />
         <input
           type="text"

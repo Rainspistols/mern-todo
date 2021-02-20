@@ -9,33 +9,56 @@ function App() {
   const mongoService = useMemo(() => new MongoService(), []);
 
   useEffect(() => {
-    mongoService.getAllTodos().then((data) => setTodos(data));
+    mongoService
+      .getAllTodos()
+      .then((data) => setTodos(data.hits.hits.map((item) => ({ ...item._source, _id: item._id }))));
   }, [mongoService]);
 
   const addTodo = () => {
-    mongoService
-      .postTodo({ name: inputValue })
-      .then((res) => res.json())
-      .then((data) => {
+    const newTodo = { name: inputValue };
+    mongoService.postTodo(newTodo).then((data) => {
+      if (data.result === 'created') {
+        newTodo._id = data._id;
+        setTodos([...todos, newTodo]);
         setInputValue('');
-        setTodos([...todos, data]);
-      });
+      }
+    });
   };
 
   const deleteTodo = (_id) => {
-    const index = todos.findIndex((item) => item._id === _id);
-    mongoService
-      .deleteTodo(_id)
-      .then(
-        (res) =>
-          res.ok && setTodos([...todos.slice(0, index), ...todos.slice(index + 1, todos.length)])
-      );
+    mongoService.deleteTodo(_id).then((data) => {
+      if (data.result === 'deleted') {
+        setTodos(todos.filter((item) => item._id !== data._id));
+      }
+    });
+  };
+
+  const searchTodo = (name) => {
+    if (name) {
+      mongoService.searchTodos(name).then((data) => {
+        console.log(data);
+        if (data.hits.hits.length > 0) {
+          setTodos(data.hits.hits.map((item) => ({ ...item._source, _id: item._id })));
+        }
+      });
+    } else {
+      mongoService
+        .getAllTodos()
+        .then((data) =>
+          setTodos(data.hits.hits.map((item) => ({ ...item._source, _id: item._id })))
+        );
+    }
   };
 
   return (
     <div className="App">
       <header className="App-header">TODOAPP</header>
-      <Controls addTodo={addTodo} inputValue={inputValue} setInputValue={setInputValue} />
+      <Controls
+        addTodo={addTodo}
+        inputValue={inputValue}
+        setInputValue={setInputValue}
+        searchTodo={searchTodo}
+      />
       <TodoList todos={todos} deleteTodo={deleteTodo} setTodos={setTodos} todos={todos} />
     </div>
   );
