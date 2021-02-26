@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const connectDb = require('./connection');
-const Todo = require('./Todo.model');
 
 require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
+
+const { Client } = require('@elastic/elasticsearch');
+const client = new Client({ node: 'http://localhost:9200' });
 
 app.use(cors());
 app.use(express.json());
@@ -27,46 +28,82 @@ app.use((err, req, res, next) => {
   res.status(errCode).send(errMessage);
 });
 
-const getAllTodos = (req, res) => {
-  Todo.find({}, (err, todos) => {
-    res.json(todos);
+const getAllTodos = async (req, res) => {
+  const {
+    body: {
+      hits: { hits },
+    },
+  } = await client.search({
+    index: 'todos',
+    body: {
+      query: {
+        match_all: {},
+      },
+    },
+    size: 100,
+    _source: true,
   });
+
+  res.json(hits.map((item) => ({ id: item._id, ...item._source })));
 };
 
-const getTodo = (req, res) => {
-  Todo.findById(req.params.id, (err, todo) => {
-    todo ? res.json(todo) : res.json(`${req.params.id} is not valid`);
+const createTodo = async (req, res) => {
+  const {
+    body: { result, _id },
+  } = await client.index({
+    index: 'todos',
+    body: req.body,
   });
+
+  res.json({ result, item: { id: _id, ...req.body } });
 };
 
-const createTodo = (req, res) => {
-  const newTodo = new Todo({ name: req.body.name });
-  newTodo.save().then(() => res.send(newTodo));
+const deleteTodo = async (req, res) => {
+  const {
+    body: { result },
+  } = await client.delete({
+    index: 'todos',
+    id: req.params.id,
+  });
+
+  res.json(result);
 };
 
-const deleteTodo = (req, res) => {
-  Todo.deleteOne({ _id: req.params.id }, (err, removedTodo) => {
-    if (err) return res.send(err);
-    return res.json(removedTodo);
+const editTodo = async (req, res) => {
+  const { body } = await client.update({
+    index: 'todos',
+    id: req.params.id,
+    body: { doc: req.body },
   });
+
+  res.json(body);
 };
 
-const editTodo = (req, res) => {
-  Todo.updateOne({ _id: req.params.id }, { name: req.body.name }, (err, editedTodo) => {
-    if (err) return res.send(err);
-    return res.json(editedTodo);
+const searchTodos = async (req, res) => {
+  const {
+    body: {
+      hits: { hits },
+    },
+  } = await client.search({
+    index: 'todos',
+    body: {
+      query: {
+        match: req.body,
+      },
+    },
+    size: 100,
+    _source: true,
   });
+
+  res.json(hits.map((item) => ({ id: item._id, ...item._source })));
 };
 
 app.get('/api/todos', getAllTodos);
-app.get('/api/todos/:id', getTodo);
 app.post('/api/todos', createTodo);
 app.delete('/api/todos/:id', deleteTodo);
 app.put('/api/todos/:id', editTodo);
+app.post('/api/todos/search', searchTodos);
 
 app.listen(port, function () {
   console.log(`Listening on ${port}`);
-  connectDb().then(() => {
-    console.log('MongoDb connected');
-  });
 });
