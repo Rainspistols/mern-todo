@@ -9,45 +9,35 @@ function App() {
   const mongoService = useMemo(() => new MongoService(), []);
 
   useEffect(() => {
-    mongoService
-      .getAllTodos()
-      .then((data) => setTodos(data.hits.hits.map((item) => ({ ...item._source, _id: item._id }))));
+    mongoService.getAllTodos().then((data) => setTodos(data));
   }, [mongoService]);
 
   const addTodo = () => {
     const newTodo = { name: inputValue };
     mongoService.postTodo(newTodo).then((data) => {
       if (data.result === 'created') {
-        newTodo._id = data._id;
-        setTodos([...todos, newTodo]);
+        setTodos([...todos, data.item]);
         setInputValue('');
       }
     });
   };
 
-  const deleteTodo = (_id) => {
-    mongoService.deleteTodo(_id).then((data) => {
-      if (data.result === 'deleted') {
-        setTodos(todos.filter((item) => item._id !== data._id));
+  const deleteTodo = (id) => {
+    mongoService.deleteTodo(id).then((data) => {
+      if (data === 'deleted') {
+        setTodos(todos.filter((item) => item.id !== id));
       }
     });
   };
 
-  const searchTodo = (name) => {
-    if (name) {
-      mongoService.searchTodos(name).then((data) => {
-        console.log(data);
-        if (data.hits.hits.length > 0) {
-          setTodos(data.hits.hits.map((item) => ({ ...item._source, _id: item._id })));
-        }
-      });
-    } else {
-      mongoService
-        .getAllTodos()
-        .then((data) =>
-          setTodos(data.hits.hits.map((item) => ({ ...item._source, _id: item._id })))
-        );
-    }
+  const searchTodo = (body) => {
+    mongoService.searchTodos(body).then((data) => {
+      if (data.length > 0) {
+        setTodos(data);
+      } else {
+        mongoService.getAllTodos().then((data) => setTodos(data));
+      }
+    });
   };
 
   return (

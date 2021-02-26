@@ -9,8 +9,7 @@ const TodoItem = ({ item, deleteTodo, setTodos, todos }) => {
 
   const onSpanClick = () => setEdit(true);
   const onInputBlur = () => {
-    console.log(item._id);
-    mongoService.editTodo(item._id, { name: inputValues }).then((data) => {
+    mongoService.editTodo(item.id, { name: inputValues }).then((data) => {
       if (data.result === 'updated') {
         setTodos(
           todos.map((todoItem) =>
@@ -30,12 +29,13 @@ const TodoItem = ({ item, deleteTodo, setTodos, todos }) => {
           value={inputValues}
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={onInputBlur}
+          onKeyDown={(e) => e.key === 'Enter' && onInputBlur()}
         />
       ) : (
         <span onClick={onSpanClick}>{inputValues}</span>
       )}
       <button onClick={onSpanClick}> &#9998;</button>
-      <button onClick={() => deleteTodo(item._id)}> &#128465;</button>
+      <button onClick={() => deleteTodo(item.id)}> &#128465;</button>
     </li>
   );
 };
@@ -45,7 +45,7 @@ const TodoList = ({ todos, deleteTodo, setTodos }) => {
     <ul>
       {todos?.map((item) => (
         <TodoItem
-          key={item._id}
+          key={item.id}
           item={item}
           deleteTodo={deleteTodo}
           setTodos={setTodos}

@@ -10,7 +10,7 @@ const Controls = ({ addTodo, inputValue, setInputValue, searchTodo }) => {
 
   const onSearchChange = (e) => {
     setSearchInput(e.target.value);
-    searchTodo(e.target.value);
+    searchTodo({ name: e.target.value });
   };
 
   return (

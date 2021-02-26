@@ -1,7 +1,7 @@
 export default class MongoService {
-  _apiBase = 'http://localhost:9200';
+  _apiBase = 'http://localhost:5000/api';
 
-  getResource = (url) => {
+  getResource = (url, body) => {
     return fetch(`${this._apiBase}${url}`).then((res) => {
       if (!res.ok) {
         throw new Error(`Could not fetch ${url}` + `, received ${res.status}`);
@@ -38,11 +38,10 @@ export default class MongoService {
     }).then((data) => data.json());
   };
 
-  getAllTodos = () =>
-    this.getResource('/todos/_search?size=100&filter_path=hits.hits._source,hits.hits._id');
+  getAllTodos = () => this.getResource('/todos');
   getTodo = (id) => this.getResource(`/todos/${id}`);
-  postTodo = (body) => this.postResource('/todos/_doc/', body);
-  deleteTodo = (id) => this.deleteResource(`/todos/_doc/${id}`);
-  editTodo = (id, body) => this.putResource(`/todos/_doc/${id}`, body);
-  searchTodos = (name) => this.getResource(`/todos/_search?q=name:${name}`);
+  postTodo = (body) => this.postResource('/todos/', body);
+  deleteTodo = (id) => this.deleteResource(`/todos/${id}`);
+  editTodo = (id, body) => this.putResource(`/todos/${id}`, body);
+  searchTodos = (body) => this.postResource(`/todos/search`, body);
 }
