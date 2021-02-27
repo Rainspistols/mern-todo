@@ -7,7 +7,7 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 const { Client } = require('@elastic/elasticsearch');
-const client = new Client({ node: 'http://localhost:9200' });
+const client = new Client({ node: 'https://search-dev-elastic-bf2lpdua7cfid7semxskyjowwi.eu-central-1.es.amazonaws.com' });
 
 app.use(cors());
 app.use(express.json());
